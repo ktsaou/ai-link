@@ -14,7 +14,7 @@ drives every session; peers only ever see what a session has published.
 | **publish** | Flush the outbox (turns accumulated since the last publish) into the transcript file and enqueue one envelope to each peer. |
 | **delivery** | An enqueued envelope becoming visible inside another member's session. |
 | **master** | The round-starter: first member to join (under the slug lock). A master publish opens a round, which releases everyone's queued envelopes. |
-| **pause** | Member state: publishes nothing, receives nothing. Outbound turns stay in the outbox; inbound envelopes keep enqueuing undelivered. |
+| **pause** | Member state gating **publishing and delivery-into-session only**. Capture from the client (assistant text + typed prompts → outbox and transcript on publish) **never stops**; inbound envelopes keep enqueuing in the inbox undelivered. Pause never means "stop listening". |
 | **round** | Global counter (`meta.round`), incremented by each master publish. Envelopes stamp the round they were published in. |
 | **outbox** | Durable per-member file of turns captured but not yet published. |
 | **welcome** | First message a joining member receives, naming the transcripts directory. Bypasses round gating. |

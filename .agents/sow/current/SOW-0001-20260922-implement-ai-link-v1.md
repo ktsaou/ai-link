@@ -249,6 +249,17 @@ Open decisions:
 - User decisions after review: CC slashless-only; strict resume cadence confirmed;
   OpenCode supported on **both** v1 and v2 as two separate adapters (team uses v1; v2
   not fully baked) with a command-surface spike gate (AC3a).
+- Pause semantics clarified by user: pause gates publishing (+delivery-into-session)
+  ONLY; capture→transcript never stops and transcripts are live (append at turn
+  finalize). Spec §1 concept row amended.
+- Ledger model agreed in direction (single global append-only ledger + per-role cursor
+  under roles/ + meta round/master; per-entry master/members snapshot) — replaces
+  per-peer inbox fan-out. Edge-case walk requested by user; wrote flow specification
+  `.agents/sow/specs/ai-link-flows.md` v0.1 draft (F1–F14, anti-echo rules R1–R7,
+  canonical welcome text, invariants L1–L6). Ping-pong risk answered structurally:
+  injection never wakes a model (R1) and broadcasts ride human keystrokes only (R2).
+- Open decisions now D1–D5 (see flows spec §5), all blocking the v0.4 product-spec
+  rewrite; M1 implementation paused until they close.
 
 ## Validation
 
