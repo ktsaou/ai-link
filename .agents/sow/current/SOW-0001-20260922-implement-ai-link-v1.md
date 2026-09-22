@@ -252,7 +252,41 @@ Open decisions:
 
 ## Validation
 
-Pending.
+To be completed at close per the Validation Gate in AGENTS.md.
+
+Acceptance criteria evidence: pending (AC0–AC6).
+
+Tests or equivalent validation: pending (`node --test`).
+
+Real-use evidence: pending (M2–M4 scripted e2e).
+
+Reviewer findings: round-1 plan review complete — glm/grok/opus/sol verdicts and
+adjudications recorded in spec §10 and Execution Log; implementation review pending at
+milestone boundaries.
+
+Same-failure scan: pending at close.
+
+Sensitive data gate:
+
+- Planned: all committed fixtures synthetic (AGENTS.md ai-link hazard); manual e2e evidence
+  summarized, not pasted, when it may contain real conversation. Final confirmation pending
+  at close.
+
+Artifact maintenance gate: pending at close (per AGENTS.md classes).
+
+Specs update: spec maintained to v0.3 through adjudication; per-milestone updates pending.
+
+Project skills update: `project-adapter-testing` planned at M1 per Artifact impact plan.
+
+End-user/operator docs update: README refreshed to v0.3 surfaces; `docs/clients/*`
+pending M2–M5.
+
+End-user/operator skills update: none exist yet; reason recorded in gate (adapters ship as
+client bundles).
+
+Lessons: pending.
+
+Follow-up mapping: pending at close.
 
 ## Outcome
 
