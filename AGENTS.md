@@ -405,4 +405,8 @@ be recorded here when M1 lands the `package.json` (`npm test` wrapping `node --t
   remains as a redirect stub so the draft's history and any inbound references still
   resolve.
 
-Project SOW status: in-progress (SOW-0001)
+Project SOW status: initialized
+
+Active SOW: `.agents/sow/current/SOW-0001-20260922-implement-ai-link-v1.md`
+(in-progress). The line above is the framework-installation marker checked by
+`.agents/sow/audit.sh`; do not repurpose it for lifecycle state.
