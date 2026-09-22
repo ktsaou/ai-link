@@ -260,6 +260,18 @@ Open decisions:
   injection never wakes a model (R1) and broadcasts ride human keystrokes only (R2).
 - Open decisions now D1–D5 (see flows spec §5), all blocking the v0.4 product-spec
   rewrite; M1 implementation paused until they close.
+- **Capability feasibility study completed** (`specs/ai-link-feasibility.md` v1): full
+  matrix over the user's taxonomy (input intercept/enrich/block/attribute; output
+  reasoning/tools/text/background/four-states; display in/out-of-model; steer/queue/wake)
+  plus lifecycle/execution/provenance/cost, per client plane (Codex hooks vs app-server,
+  CC classic vs mods, OpenCode v1 vs v2, pi), cited to commits. Headline: wake-on-idle
+  is natively feasible on pi/OpenCode (resident adapters) and Codex **daemon mode only**
+  (`turn/start` from any daemon connection runs on the human's live thread); Claude Code
+  externally = no (classic), /loop human-armed wakeups = yes; mods and `-p --resume`
+  wake rejected (early-access / history fork-corruption). Six spikes S1–S6 gate the v0.4
+  rewrite; v0.3 corrections listed in feasibility §"Consequences" (incl. OC1 empty-parts
+  zero-turn claim FALSE, OC1 permission.ask dead, CC session_id mutability on
+  /clear/resume, invisible-unicode stripping ⇒ plain-text markers).
 
 ## Validation
 

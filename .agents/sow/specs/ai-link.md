@@ -454,7 +454,11 @@ the next prompt (accepted, §9).
 1. **CC and Codex have no real `/ai-link`** — slashless intercepted surface is the command
    surface on both (CC decision 2026-09-22 extends what was Codex-only). OpenCode/pi have
    the native slash.
-2. **CC/Codex cannot be pushed into while idle** — lazy piggyback only.
+2. **CC/Codex cannot be pushed into while idle** — lazy piggyback only *on the
+   hook/classic plane*. Correction per feasibility study: Codex **daemon mode** admits
+   external `turn/start`/`thread/queue/add` (wake + push); CC human-armed `/loop`
+   wakeups fire hook-visible machine turns. Whether v1 uses any of these is D6 (§11
+   `wake` toggle), not a capability gap. See `.agents/sow/specs/ai-link-feasibility.md`.
 3. **CC ESC detection is heuristic**; Codex/OpenCode exact; pi field-availability varies
    by installed build (§6.4).
 4. **CC hook config changes need a session restart** — installer says so.
