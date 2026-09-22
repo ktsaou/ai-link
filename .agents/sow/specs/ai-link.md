@@ -84,17 +84,20 @@ Rules:
                   /tmp/ai-link/<slug>/   (filesystem = the bus)
 ```
 
-- **ai-link-core**: the whole model — registry, pause/master state machine, envelope
-  encode/decode, transcript writing, cursor tracking. Pure functions over the filesystem,
-  single dependency: a file lock. Published as one npm package containing
-  `core`, the `ai-link` CLI binary, and the four client adapters.
-- **OpenCode & pi adapters** import `core` directly (in-process plugins, no CLI spawn).
+- **ai-link**: one small codebase — registry, pause/master state machine, envelope
+  encode/decode, transcript writing, cursor tracking. Pure functions over the filesystem;
+  **zero runtime dependencies** (locking via `O_EXCL` lockfiles, atomic rename-into-place).
+  Shipped as **one package** containing the library, the `ai-link` CLI entry, and the four
+  client adapter files. **Absolutely minimal** is a hard constraint (see §10): plain ESM
+  JavaScript so there is **no build step and no `tsx` runtime dependency** — pi accepts
+  `.js` extensions, OpenCode accepts `.js` plugins, CC/Codex hooks spawn the CLI under plain
+  `node`. TypeScript was rejected for v1: it adds tooling without changing behavior; a
+  `.d.ts`-free JSDoc-typed codebase is acceptable at this size.
+- **OpenCode & pi adapters** import the library directly (in-process plugins, no CLI spawn).
 - **Codex & Claude Code adapters** are thin: hook scripts / command markdown that shell out
   to the `ai-link` CLI. They hold no logic.
-- Language: TypeScript, Node ≥ 20, run via `npx`/installed bin; adapters must not assume a
-  package manager beyond node being present.
-- All writes are lock-guarded (`O_EXCL` lockfile or `proper-lockfile`) with atomic
-  rename-into-place; concurrent sessions on one slug are expected.
+- All writes are lock-guarded with atomic rename-into-place; concurrent sessions on one
+  slug are expected.
 
 ### 3.1 On-disk layout — `/tmp/ai-link/<slug>/`
 
@@ -105,7 +108,7 @@ transcripts/<name>.md     # human-and-model-readable cumulative transcript (appe
                             #   paused: {at, auto}|null, cursor: {seq}, deliveredSeq }
 .state/outbox/<name>.seq  # next sequence number for <name>'s turns
 .inbox/<to>/<seq>-<from>.ai-link.md   # queued envelopes for member <to>, one file per publish
-.journal.log              # append-only audit of commands and deliveries (debug)
+.state/journal/<op>.json  # transient intent files for crash-safe writes (§8); no permanent log
 ```
 
 `transcripts/` is the stable shared-history surface: created at slug init, never pruned by
@@ -360,8 +363,7 @@ next prompt (their hooks can't fire between prompts). Accepted limitation of laz
   never deleted. `/tmp` reboot-cleanup is the eventual janitor.
 - **Crash mid-publish**: writes are journal-first (intent → write → commit); a half-written
   envelope never delivers (atomic rename). `seq` numbers dedupe on the receive side
-  (`deliveredSeq` cursor).
-- **Two sessions, same name**: rejected at join (advisory lock on member file creation).
+  (`deliveredSeq` cursor).- **Two sessions, same name**: rejected at join (advisory lock on member file creation).
 - **Slug dir gone** (someone rm'd /tmp/ai-link/x, including transcripts): adapters degrade
   to a loud error on next command, recreate empty dir on next join, sessions must re-link.
   Transcript durability beyond `/tmp` lifetime = backlog (§11), not v1.
@@ -403,6 +405,12 @@ next prompt (their hooks can't fire between prompts). Accepted limitation of laz
 - OpenCode/pi additionally support zero-turn transcript injection when idle.
 - Envelope feedback on CC/Codex via hook `systemMessage`: approved (zero model turn).
 
+- Node-only runtime (v1): CLI and adapters run under `node` ≥ 20; no bun/deno requirement.
+- **Absolutely minimal implementation** (user constraint 2026-09-22): the complete specified
+  functionality with the smallest possible footprint — zero runtime deps, no build step,
+  plain ESM JavaScript in one package, minimal file tree, no extra abstraction beyond what
+  the spec requires. Where the spec offers choices, the smaller one wins.
+
 ## 11. Out of scope (backlog)
 
 - Multi-slug per session; cross-machine links (broker over ssh/socket); auto-wake mode
@@ -414,17 +422,20 @@ next prompt (their hooks can't fire between prompts). Accepted limitation of laz
 
 ## 12. Repo layout
 
+Minimal on purpose (§10): one package, no workspaces, no build step.
+
 ```
 ai-link/
-  packages/core/            # state machine, envelope codec, transcript writer, locking
-  packages/cli/             # `ai-link` broker binary (thin over core)
-  clients/claude/           # .claude-plugin/plugin.json, commands/, hooks/
-  clients/codex/            # .codex-plugin/plugin.json, hooks.json, skills/
-  clients/opencode/         # v2 plugin + v1 compat
-  clients/pi/               # extension
-  docs/{protocol.md,clients/*.md}
-  test/                     # core unit tests + a 4-adapter fake-client harness
+  lib/                      # core: state machine, envelope codec, transcript writer, locks
+  cli/ai-link.js            # CLI entry (thin over lib) — `bin` in package.json
+  clients/pi/index.js       # pi extension (imports ../lib directly)
+  clients/opencode/index.js # OpenCode plugin (v2; v1 compat only if §6.3 shim fits in same file)
+  clients/claude/           # .claude-plugin/plugin.json, commands/, hooks/*.js
+  clients/codex/            # .codex-plugin/plugin.json, hooks.json
+  docs/clients/*.md         # per-client install guides
+  test/                     # node:test suites incl. fake-client adapter harness
+  package.json              # name, bin, files — no build, no deps
 ```
 
-Milestones: **M1** core+CLI+protocol tests · **M2** pi + OpenCode (rich APIs, fastest
+Milestones: **M1** lib+CLI+tests · **M2** pi + OpenCode (rich APIs, fastest
 e2e) · **M3** Claude Code · **M4** Codex · **M5** install story + docs.

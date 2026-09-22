@@ -43,9 +43,9 @@ Facts:
 
 Inferences:
 
-- A single TypeScript core + CLI with thin per-client adapters minimizes drift; the
-  in-process adapters (OpenCode/pi) can import core directly.
-- Fake-client harness (driving core through the adapter contract §6.5) can test all
+- A single minimal JavaScript library + CLI with thin per-client adapters minimizes drift;
+  the in-process adapters (OpenCode/pi) import the library directly.
+- Fake-client harness (driving the library through the adapter contract §6.5) can test all
   lifecycle behavior without installing the four real clients; real-client validation is
   then a manual milestone gate (M2–M4).
 
@@ -56,10 +56,10 @@ Unknowns:
 
 ### Acceptance Criteria
 
-- AC1: `ai-link` CLI + core pass unit tests for: join/leave/name-collision/welcome queueing,
+- AC1: `ai-link` CLI + lib pass tests for: join/leave/name-collision/welcome queueing,
   pause/resume/auto-pause state machine, publish/round/release semantics, envelope
   encode/decode incl. base64 escape, transcript append format, inbox cursors/dedup,
-  crash-safe atomic writes under lock. Verified by `pnpm test` (or chosen runner).
+  crash-safe atomic writes under lock. Verified by `node --test`.
 - AC2: pi adapter e2e: two pi sessions on one slug exchange envelopes per spec; ESC pauses
   with immediate status; `resume` flushes; welcome message names the transcripts dir.
   Verified by scripted manual run, evidence summarized in this SOW.
@@ -149,15 +149,17 @@ Sensitive data handling plan:
 
 Implementation plan:
 
-1. M1 — toolchain + `packages/core` + `packages/cli` + fake-client harness tests
+0. Constraint (user, 2026-09-22): **absolutely minimal** implementation delivering the
+   complete spec — zero runtime deps, no build step, plain ESM JS, single package,
+   smallest file tree (spec §10/§12). Every layer must earn its place.
+1. M1 — `lib/` + `cli/ai-link.js` + fake-client harness tests on `node:test`
    (join/welcome, state machine, publish/round/release, envelope codec, transcript
-   writer, locking/journal). Establishes pnpm+vitest (or equivalent, see open decision 1).
-2. M2 — pi adapter + OpenCode v2 adapter (in-process core imports) + scripted e2e harness;
-   v1-OpenCode compat shim.
+   writer, locking/journal). `package.json` with `bin` only; no tooling beyond node.
+2. M2 — pi adapter + OpenCode v2 adapter (direct `lib/` imports) + scripted e2e; v1-OpenCode
+   compat only if it fits in the same file without abstraction cost.
 3. M3 — Claude Code plugin (hooks.json, command md, statusline snippet) driven by CLI.
-4. M4 — Codex plugin bundle (hooks.json, optional skill) driven by CLI.
-5. M5 — install story (README, `docs/clients/*.md`, optional install script), polish,
-   spec conformance pass.
+4. M4 — Codex plugin bundle (hooks.json) driven by CLI; skill sugar only if zero-cost.
+5. M5 — install story (README, `docs/clients/*.md`), spec conformance pass.
 
 Validation plan:
 
@@ -189,12 +191,12 @@ Open-source reference evidence:
 
 Open decisions:
 
-1. **Package manager/test runner**: pnpm workspace + vitest (recommended; matches TS
-   monorepo convention and the clients' own ecosystems), vs npm workspaces + node:test
-   (zero extra deps). Blocks M1.
-2. **Package publishing**: ship as a single npm package `ai-link` containing core+CLI+all
-   four adapter files, recommended (one install path), vs per-client packages. Blocks M5
-   install story, not M1.
+1. ~~**Package manager/test runner**~~ — **resolved 2026-09-22**: the minimalism constraint
+   (user) selects plain ESM JS + `node:test` + bare `package.json`; no package manager
+   beyond npm-defaults, no runner dependency.
+2. **Package publishing**: ship as a single npm package `ai-link` containing lib+CLI+all
+   four adapter files, recommended (one install path, matches minimalism), vs per-client
+   packages. Blocks M5 install story, not M1.
 3. **Repo hosting**: this local git repo — publish to GitHub now or keep local until M5.
    Does not block.
 

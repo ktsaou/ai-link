@@ -378,15 +378,23 @@ Output/reference skills:
 
 ### Project-specific commands
 
-Toolchain not yet established; the first implementation chunk in SOW-0001 fixes the package
-manager and test runner, at which point canonical build/test commands are recorded here.
+Toolchain fixed by SOW-0001 (minimalism constraint): plain ESM JavaScript, `node` ≥ 20,
+tests via `node --test`, no build step, zero runtime dependencies. Canonical commands will
+be recorded here when M1 lands the `package.json` (`npm test` wrapping `node --test test/`).
 
 ### Project-specific overrides
 
 - The product spec lives at `.agents/sow/specs/ai-link.md`; the repo-root `SPEC.md` is a
   pointer stub, not a second source of truth.
-- Design constraint that overrides convenience: no daemon, no network, no patches to any
-  client — if a proposed implementation needs one of those, stop and ask the user.
+- Design constraints that override convenience:
+  - No daemon, no network, no patches to any client — if a proposed implementation needs
+    one of those, stop and ask the user.
+  - **Absolutely minimal implementation sufficient to deliver the complete specified
+    functionality** (user constraint, 2026-09-22): zero runtime dependencies, no build
+    step, one package, smallest file tree that delivers the spec. Every abstraction,
+    config knob, helper layer, and "nice to have" must earn its place against the spec —
+    if removing it still delivers specified behavior, remove it. When minimal and elegant
+    conflict, minimal wins; record any exception in the active SOW.
 
 ### Preservation Notes
 
