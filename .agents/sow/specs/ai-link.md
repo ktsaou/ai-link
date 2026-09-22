@@ -428,6 +428,9 @@ next prompt (their hooks can't fire between prompts). Accepted limitation of laz
 - OpenCode/pi additionally support zero-turn transcript injection when idle.
 - Envelope feedback on CC/Codex via hook `systemMessage`: approved (zero model turn).
 
+- **Packaging**: one npm package (`ai-link`, repo-as-package, zero deps, no build) as
+  canonical distribution, plus `ai-link install <client>` git-clone fallback; no per-client
+  vendored bundles (spec §12.1).
 - Node-only runtime (v1): CLI and adapters run under `node` ≥ 20; no bun/deno requirement.
 - **Absolutely minimal implementation** (user constraint 2026-09-22): the complete specified
   functionality with the smallest possible footprint — zero runtime deps, no build step,
@@ -460,5 +463,19 @@ ai-link/
   package.json              # name, bin, files — no build, no deps
 ```
 
+### 12.1 Distribution (decision 2026-09-22: npm package + git fallback)
+
+- **Canonical**: one npm package `ai-link` (the repo itself; `files` excludes `test/`).
+  OpenCode installs it as a plugin package; pi via npm/git package; CC/Codex hook commands
+  invoke the installed bin (`ai-link …` on PATH or `npx ai-link …`).
+- **Fallback (no npm)**: plain git clone + `ai-link install <client>` subcommand (~dozens
+  of lines) that wires the checkout into the client's config/extensions path with absolute
+  paths to `cli/ai-link.js`; `ai-link install --status` reports wiring; uninstall reverses.
+- Both paths deliver byte-identical files; distribution never forks the implementation
+  (vendoring `lib` into per-client bundles is forbidden by §6.6).
+- `package.json`: `"type": "module"`, `"bin": {"ai-link": "cli/ai-link.js"}`,
+  `"exports": {".": "./lib/index.js"}`, zero `dependencies`.
+
 Milestones: **M1** lib+CLI+tests · **M2** pi + OpenCode (rich APIs, fastest
-e2e) · **M3** Claude Code · **M4** Codex · **M5** install story + docs.
+e2e) · **M3** Claude Code · **M4** Codex · **M5** install story (`ai-link install` +
+npm publish) + docs.

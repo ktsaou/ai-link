@@ -202,9 +202,9 @@ Open decisions:
 1. ~~**Package manager/test runner**~~ — **resolved 2026-09-22**: the minimalism constraint
    (user) selects plain ESM JS + `node:test` + bare `package.json`; no package manager
    beyond npm-defaults, no runner dependency.
-2. **Package publishing**: ship as a single npm package `ai-link` containing lib+CLI+all
-   four adapter files, recommended (one install path, matches minimalism), vs per-client
-   packages. Blocks M5 install story, not M1.
+2. ~~**Package publishing**~~ — **resolved 2026-09-22**: single npm package `ai-link`
+   (repo-as-package) as canonical distribution, plus `ai-link install <client>` git-clone
+   fallback; per-client vendored bundles rejected. Recorded as spec §12.1.
 3. **Repo hosting**: this local git repo — publish to GitHub now or keep local until M5.
    Does not block.
 
