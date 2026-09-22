@@ -10,11 +10,11 @@ drives every session; peers only ever see what a session has published.
 |---|---|
 | **slug** | Names a link group. Owns a directory `/tmp/ai-link/<slug>/`. Slug and member names match `^[A-Za-z0-9._-]{1,64}$` with no leading `.` and never exactly `.` or `..` (path-safety). |
 | **member / name** | One client session joined to a slug under a unique `<name>` in that slug. Each join of a name gets a **generation** `gen` (integer, starts at 1; increments when a name is reclaimed after the previous holder went stale or exited). |
-| **transcript** | `/tmp/ai-link/<slug>/transcripts/<name>.md` — cumulative published text for that name, one section per generation (assistant output + user-typed messages). Shared history: every member and human may read the whole directory. |
+| **transcript** | `/tmp/ai-link/<slug>/transcripts/<name>.md` — **live** cumulative record for that name: every finalized turn (assistant output + user-typed messages) appends at finalize time, pause-independent; one section per generation. Shared history: every member and human may read the whole directory. |
 | **publish** | Flush the outbox (turns accumulated since the last publish) into the transcript file and enqueue one envelope to each peer. |
 | **delivery** | An enqueued envelope becoming visible inside another member's session. |
 | **master** | The round-starter: first member to join (under the slug lock). A master publish opens a round, which releases everyone's queued envelopes. |
-| **pause** | Member state gating **publishing and delivery-into-session only**. Capture from the client (assistant text + typed prompts → outbox and transcript on publish) **never stops**; inbound envelopes keep enqueuing in the inbox undelivered. Pause never means "stop listening". |
+| **pause** | Member state gating **publishing and delivery-into-session only**. Capture from the client **never stops**: finalized turns append to the live transcript and queue in the outbox regardless of pause; inbound envelopes keep enqueuing undelivered. Pause never means "stop listening". (Ledger/cursor rework pending D1–D5 close — see `.agents/sow/specs/ai-link-flows.md`.) |
 | **round** | Global counter (`meta.round`), incremented by each master publish. Envelopes stamp the round they were published in. |
 | **outbox** | Durable per-member file of turns captured but not yet published. |
 | **welcome** | First message a joining member receives, naming the transcripts directory. Bypasses round gating. |
@@ -264,7 +264,8 @@ text…
 text…
 ```
 
-Appended only at publish (or final flush on graceful exit). Each generation of a reused
+Appended at every turn **finalize** — live, pause-independent (supersedes
+append-only-at-publish; ledger rewrite lands in v0.4 after D1–D5 close). Each generation of a reused
 name starts a new header section, so a reclaimed name never misattributes history
 (review). The file is exactly the published record — late joiners read it all.
 
