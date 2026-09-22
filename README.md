@@ -5,18 +5,22 @@ Link interactive coding-agent sessions — **Codex**, **Claude Code**, **OpenCod
 assistants see each other's transcripts. Turn-based; the human drives every session;
 nothing wakes a model automatically.
 
-> Status: specification agreed (v0.2), implementation pending
-> (`.agents/sow/pending/SOW-0001-20260922-implement-ai-link-v1.md`).
+> Status: specification agreed (**v0.3**, after round-1 external review), implementation
+> in progress (`.agents/sow/current/SOW-0001-20260922-implement-ai-link-v1.md`).
 > Product spec: [`.agents/sow/specs/ai-link.md`](.agents/sow/specs/ai-link.md).
 
 ## Quick picture
 
+Native slash commands on OpenCode and pi; **slashless** on Claude Code and Codex
+(zero-model-turn hook interception — the same commands, typed without the leading `/`):
+
 ```
-/ai-link review-bot alice     # link this session as alice
+/ai-link review-bot alice     # join as alice          (OpenCode, pi)
+ai-link review-bot alice      # join as alice          (Claude Code, Codex)
 /ai-link pause                # stop publishing/receiving
-/ai-link resume               # flush and rejoin the round
+/ai-link resume               # go active, publish outbox, receive inbox
 /ai-link master               # make this session the round starter
-/ai-link status               # who's linked, states, pending envelopes
+/ai-link status               # members, states, outbox/inbox counts, master aliveness
 /ai-link exit                 # unlink
 ```
 

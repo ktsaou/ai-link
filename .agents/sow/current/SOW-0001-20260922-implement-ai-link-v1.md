@@ -2,10 +2,10 @@
 
 ## Status
 
-Status: open
+Status: in-progress
 
-Sub-state: spec agreed to v0.2; implementation not started. Gate drafted; blocked on user
-approval of the draft gate (see Open decisions).
+Sub-state: spec v0.3 agreed after round-1 external review adjudication; all gate decisions
+resolved; M1 implementation starting.
 
 ## Requirements
 
@@ -38,7 +38,7 @@ other's turn-based transcripts with the human in control of every turn.
 
 Facts:
 
-- `.agents/sow/specs/ai-link.md` (v0.2) records all agreed mechanics, per-client evidence
+- `.agents/sow/specs/ai-link.md` (v0.3) records all agreed mechanics, per-client evidence
   with upstream commits, and the decisions log.
 - Capability audit per client (spec §6): OpenCode and pi support real commands, exact
   turn/interrupt events, and zero-turn injection; Claude Code and Codex rely on hooks with
@@ -71,7 +71,15 @@ Unknowns:
 - AC2: pi adapter e2e: two pi sessions on one slug exchange envelopes per spec; ESC pauses
   with immediate status; `resume` flushes; welcome message names the transcripts dir.
   Verified by scripted manual run, evidence summarized in this SOW.
-- AC3: OpenCode adapter e2e same as AC2 (v2 API; v1-compat path smoke-tested).
+- AC3: OpenCode adapter e2e on **both** plugin generations: v1 adapter (`@opencode-ai/plugin`
+  1.x — the API the user's team runs) and v2 adapter (`@opencode/plugin` 2.x) each exchange
+  envelopes with another session on one slug per spec; ESC pauses (exact on v2; heuristic
+  per §9.9 on v1, verified to fire on the tested build); `resume` flushes; welcome names the
+  transcripts dir. Verified by scripted manual runs on the actually-installed builds.
+- AC3a (gate): **v1 command-surface spike** before adapter implementation — prove on the
+  installed v1 build whether `api.command.register` (deprecated) yields a zero-model-turn
+  `/ai-link`; if not, fall back to slashless hook-interception parity for v1. Record result
+  here before M2 ships the v1 adapter.
 - AC4: Claude Code adapter e2e: piggyback delivery on next prompt; slashless command
   interception blocks with systemMessage; statusline snippet.
 - AC5: Codex adapter e2e: same as AC4 plus `Interrupt` hook auto-pause.
@@ -101,7 +109,7 @@ Risks:
 
 ## Pre-Implementation Gate
 
-Status: needs-user-decision
+Status: ready
 
 Problem / root-cause model:
 
@@ -163,8 +171,10 @@ Implementation plan:
 1. M1 — `lib/` + `cli/ai-link.js` + fake-client harness tests on `node:test`
    (join/welcome, state machine, publish/round/release, envelope codec, transcript
    writer, locking/journal). `package.json` with `bin` only; no tooling beyond node.
-2. M2 — pi adapter + OpenCode v2 adapter (direct `lib/` imports) + scripted e2e; v1-OpenCode
-   compat only if it fits in the same file without abstraction cost.
+2. M2 — pi adapter + OpenCode **v1 and v2 adapters as two separate adapter directories**
+   (user decision 2026-09-22: team runs v1 today; v2 not fully baked; both over the same
+   lib, §6.3) + scripted e2e on the installed builds. Gate: v1 command-surface spike
+   (AC3a) before the v1 adapter is implemented.
 3. M3 — Claude Code plugin (hooks.json, command md, statusline snippet) driven by CLI.
 4. M4 — Codex plugin bundle (hooks.json) driven by CLI; skill sugar only if zero-cost.
 5. M5 — install story (README, `docs/clients/*.md`), spec conformance pass.
@@ -218,8 +228,8 @@ Open decisions:
 
 ## Plan
 
-1. Await user resolution of Open decisions 1–2 (3 optional).
-2. M1 → M2 → M3 → M4 → M5 as in gate (one milestone sequence, single SOW).
+1. Implement M1 (all open decisions resolved as of 2026-09-22).
+2. M1 → M2 (incl. AC3a v1 spike gate) → M3 → M4 → M5 as in gate.
 3. Per milestone: update spec §6/§10 to shipped reality, log in Execution Log, run tests.
 
 ## Execution Log
@@ -232,6 +242,13 @@ Open decisions:
   resolved by it.
 - One-implementation/X-interfaces invariant recorded as spec §6.6 + AC0; capability
   declarations added to the adapter contract model.
+- Round-1 external review run (glm, grok, mimo, opus, sol; 4/5 NEEDS CHANGES). Spec
+  reworked to v0.3; adjudication list in spec §10; blocking fixes were lifecycle/
+  on-disk-model defects (release deadlock, durable outbox, idle watcher, cursors,
+  envelope grammar, locking) plus doc/AC consistency.
+- User decisions after review: CC slashless-only; strict resume cadence confirmed;
+  OpenCode supported on **both** v1 and v2 as two separate adapters (team uses v1; v2
+  not fully baked) with a command-surface spike gate (AC3a).
 
 ## Validation
 

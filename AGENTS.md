@@ -334,7 +334,7 @@ every matching runtime skill. Skill descriptions are mandatory hooks, not sugges
 
 Do not create generic `project-*` skills only to make the framework look complete. This
 project has no runtime project skills yet; the decision to grow them incrementally is
-recorded in `.agents/sow/pending/SOW-0001-20260922-implement-ai-link-v1.md` (as the
+recorded in `.agents/sow/current/SOW-0001-20260922-implement-ai-link-v1.md` (as the
 implementation SOW progresses, concrete reusable knowledge — e.g. client-adapter testing
 harness patterns — becomes `project-*` skills there).
 
@@ -401,7 +401,8 @@ be recorded here when M1 lands the `package.json` (`npm test` wrapping `node --t
 - Repo created 2026-09-22; bootstrapped from empty. The original draft spec `SPEC.md`
   (v0.1) was moved verbatim-with-amendments into `.agents/sow/specs/ai-link.md` (v0.2,
   adding the `role` attribute, join welcome, `transcripts/` shared-history directory, and
-  status/list commands per user decisions); `SPEC.md` remains as a redirect stub so the
-  draft's git history and any inbound references still resolve.
+  status/list commands per user decisions; v0.3 after round-1 external review); `SPEC.md`
+  remains as a redirect stub so the draft's history and any inbound references still
+  resolve.
 
-Project SOW status: initialized
+Project SOW status: in-progress (SOW-0001)
