@@ -73,7 +73,7 @@ Rules:
         │ thin adapter     │                  │ in-process       │ in-process
         ▼                  ▼                  ▼                  ▼
  ┌─────────────────────────────────────────────────────────────────┐
- │                     ai-link-core (TS library)                   │
+ │                  ai-link lib (one implementation)               │
  │  state machine · envelope format · transcript writer · locking  │
  └──────────────────────────────┬──────────────────────────────────┘
                                 │ also exposed as
@@ -341,7 +341,26 @@ onSessionEnd(sessionRef, reason)  → unlink (graceful) / stale-mark
 onIdle(sessionRef)                → try deliver (OpenCode/pi push; CC/Codex no-op)
 ```
 
-`sessionRef = { client, sessionId, cwd }`. `core` never knows what a client is beyond this.
+`sessionRef = { client, sessionId, cwd }`. `lib` never knows what a client is beyond this.
+
+### 6.6 One implementation, X interfaces (invariant)
+
+User decision 2026-09-22: exactly one behavior implementation; per-client code contains
+only interfaces/adapters. Enforced mechanically:
+
+- All commands, state machine, round/release policy, envelope codec, transcript writing,
+  inbox cursors, welcome/notice texts, and the push-vs-piggyback **fallback decision**
+  live once in `lib/`.
+- An adapter maps client events → §6.5 calls, implements outbound primitives (`inject`,
+  `showStatus`, `notify`) per what the client offers, and declares capabilities:
+  `{ push: bool, commandSurface: 'native' | 'intercept' | 'markdown', status: 'slot' |
+  'setStatus' | 'statusMessage' | 'statusline' }`. Unsupported primitives throw
+  `UnsupportedCapability`; `lib` catches and applies the central fallback (queue for
+  piggyback). Adapters contain no behavior choices.
+- **Grep test in CI suite**: no client name (`codex|claude|opencode|pi`) appears in `lib/`
+  or `cli/` source except as opaque `client` field values carried through; client names
+  exist only in `clients/*/` capability declarations. Any exception needs a recorded
+  decision here.
 
 ## 7. User-visible feedback matrix
 
@@ -402,6 +421,10 @@ next prompt (their hooks can't fire between prompts). Accepted limitation of laz
   the directory; late joiner receives everything prior members published there.
 - Solo-member slug: publish still writes the transcript and round bookkeeping runs —
   the second joiner thus receives full history (§4.3).
+- **1 implementation, X interfaces**: behavior lives once in `lib/`; client code is only
+  adapters implementing the §6.5 contract + capability declarations, with capability
+  asymmetry (push/piggyback) resolved centrally in `lib`, never branched per client in
+  logic. Enforced by the §6.6 grep test.
 - OpenCode/pi additionally support zero-turn transcript injection when idle.
 - Envelope feedback on CC/Codex via hook `systemMessage`: approved (zero model turn).
 

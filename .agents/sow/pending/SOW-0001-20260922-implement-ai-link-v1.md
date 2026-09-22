@@ -29,6 +29,10 @@ other's turn-based transcripts with the human in control of every turn.
 - Later (v0.2 review): `role` attribute confirmed; `/ai-link status` + `list` in scope;
   shared `transcripts/` directory as history for newcomers; join welcome message naming
   the transcripts directory; first joiner sees solo-member history when second joins.
+- "Absolutely minimal implementation to deliver the complete functionality" (2026-09-22).
+- "1 implementation with X interfaces, not X implementations — exactly the same
+  implementation for all ai clients with specific adapters each client provides"
+  (2026-09-22).
 
 ### Assistant Understanding
 
@@ -60,6 +64,10 @@ Unknowns:
   pause/resume/auto-pause state machine, publish/round/release semantics, envelope
   encode/decode incl. base64 escape, transcript append format, inbox cursors/dedup,
   crash-safe atomic writes under lock. Verified by `node --test`.
+- AC0: one-implementation invariant (spec §6.6): fake clients prove all four adapters
+  drive the same `lib` code paths (push-capable and non-push adapters differ only in
+  capability declaration); grep test proves no client-name branches in `lib/`/`cli/`.
+  Verified by `node --test`.
 - AC2: pi adapter e2e: two pi sessions on one slug exchange envelopes per spec; ESC pauses
   with immediate status; `resume` flushes; welcome message names the transcripts dir.
   Verified by scripted manual run, evidence summarized in this SOW.
@@ -219,6 +227,10 @@ Open decisions:
 
 - Repo bootstrapped (git init, AGENTS.md from SOW template, spec v0.2 in specs/, SOW
   created pending gate approval).
+- Minimalism constraint recorded (zero deps, no build, single package); open decision 1
+  resolved by it.
+- One-implementation/X-interfaces invariant recorded as spec §6.6 + AC0; capability
+  declarations added to the adapter contract model.
 
 ## Validation
 
