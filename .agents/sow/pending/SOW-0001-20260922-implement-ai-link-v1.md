@@ -205,8 +205,9 @@ Open decisions:
 2. ~~**Package publishing**~~ — **resolved 2026-09-22**: single npm package `ai-link`
    (repo-as-package) as canonical distribution, plus `ai-link install <client>` git-clone
    fallback; per-client vendored bundles rejected. Recorded as spec §12.1.
-3. **Repo hosting**: this local git repo — publish to GitHub now or keep local until M5.
-   Does not block.
+3. ~~**Repo hosting**~~ — **resolved 2026-09-22**: canonical home is
+   `github.com/ktsaou/ai-link` (public); repo created and `main` pushed. Affects M5 docs
+   (install paths reference the GitHub URL).
 
 ## Implications And Decisions
 

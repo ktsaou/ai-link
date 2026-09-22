@@ -26,6 +26,8 @@ when idle (OpenCode/pi inject directly; Claude Code/Codex deliver on your next p
 
 ## Repository
 
+Canonical home: <https://github.com/ktsaou/ai-link> (public).
+
 - `AGENTS.md` — project instructions / SOW runtime contract
 - `.agents/sow/` — SOW ledger and the product spec under `specs/`
-- `packages/`, `clients/` — created by SOW-0001 (not yet implemented)
+- `lib/`, `cli/`, `clients/` — created by SOW-0001 (not yet implemented)
